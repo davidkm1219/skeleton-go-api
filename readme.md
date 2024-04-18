@@ -36,7 +36,7 @@ make build
 Now run `curl http://localhost:8080/photos/1` will return
 
 ```json
-{"albumId":1,"id":1,"title":"accusamus beatae ad facilis cum similique qui sunt","url":"https://via.placeholder.com/600/92c952","thumbnailUrl":"https://via.placeholder.com/150/92c952"}%
+{"albumId":1,"id":1,"title":"accusamus beatae ad facilis cum similique qui sunt","url":"https://via.placeholder.com/600/92c952","thumbnailUrl":"https://via.placeholder.com/150/92c952"}
 ```
 
 ## Go Implementation Guidelines 
