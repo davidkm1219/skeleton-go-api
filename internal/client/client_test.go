@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/twk/skeleton-go-cli/internal/client"
+	"github.com/twk/skeleton-go-api/internal/client"
 )
 
 func TestClient_Get(t *testing.T) {

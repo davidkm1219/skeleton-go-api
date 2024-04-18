@@ -1,22 +1,22 @@
-# skeleton-go-cli
+# skeleton-go-api
 
-This is my take of skeleton project for a Go CLI application. It is intended to be used as a starting point for new CLI applications.
+This is my take of skeleton project for a Go API application. It is intended to be used as a starting point for new API applications.
 
 ## Usage
 
-To use this project as a starting point for a new CLI application, follow these steps:
+To use this project as a starting point for a new API application, follow these steps:
 1. Clone this repository.
-2. Rename the `skeleton-go-cli` directory to the name of your new application.
+2. Rename the `skeleton-go-api` directory to the name of your new application.
 3. Update the `go.mod` file to reflect the new module name.
-4. Replace `skeleton-go-cli` with the new application name in all files.
-5. Implement the desired functionality for the new CLI application.
+4. Replace `skeleton-go-api` with the new application name in all files.
+5. Implement the desired functionality for the new API application.
 
-You can basically replace the `skeleton-go-cli` with your new application name and start building your CLI application.
+You can basically replace the `skeleton-go-api` with your new application name and start building your API application.
 
 ## What's Included
 
 This project includes the following components:
-- A basic CLI application structure.
+- A basic API application structure.
 - A simple command with a subcommand.
 - Makefile for Build and test scripts.
 - A `Makefile` with common tasks.
@@ -30,7 +30,13 @@ This project includes the following components:
 This project includes a sample service that fetches photos from jsonplaceholder.typicode.com. The service is implemented in the `photos` package and is used by the `get` command to fetch.
 ```bash
 make build
-./skeleton-go-cli get 10 # will get 10 photos concurrently
+./skeleton-go-api
+```
+
+Now run `curl http://localhost:8080/photos/1` will return
+
+```json
+{"albumId":1,"id":1,"title":"accusamus beatae ad facilis cum similique qui sunt","url":"https://via.placeholder.com/600/92c952","thumbnailUrl":"https://via.placeholder.com/150/92c952"}%
 ```
 
 ## Go Implementation Guidelines 

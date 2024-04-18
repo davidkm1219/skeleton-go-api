@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/twk/skeleton-go-cli/internal/config"
+	"github.com/twk/skeleton-go-api/internal/config"
 )
 
 func TestViper_BuildConfig(t *testing.T) {
@@ -34,9 +34,6 @@ func TestViper_BuildConfig(t *testing.T) {
 					ConfigPath: "test/config.yaml",
 					LogLevel:   "info",
 					Stacktrace: true,
-					Get: config.Get{
-						Timeout: 5000000000,
-					},
 				},
 			},
 		},

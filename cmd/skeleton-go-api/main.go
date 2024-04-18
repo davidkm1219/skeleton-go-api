@@ -2,10 +2,10 @@
 package main
 
 import (
-	"github.com/twk/skeleton-go-cli/cmd/skeleton-go-cli/commands"
 	"go.uber.org/zap"
 
-	"github.com/twk/skeleton-go-cli/internal/logger"
+	"github.com/twk/skeleton-go-api/cmd/skeleton-go-api/commands"
+	"github.com/twk/skeleton-go-api/internal/logger"
 )
 
 func main() {

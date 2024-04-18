@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 packages=$(go list ./... \
-  | grep -v "^github.com/twk/skeleton-go-cli/cmd" \
+  | grep -v "^github.com/twk/skeleton-go-api/cmd" \
   | grep -v "/mocks" \
 )
 

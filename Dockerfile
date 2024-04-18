@@ -1,4 +1,4 @@
-ARG REPO_NAME=skeleton-go-cli
+ARG REPO_NAME=skeleton-go-api
 ARG REPO_PATH=/go/src/github.com/$REPO_NAME
 
 FROM golang:1.22.1-alpine3.18 AS build

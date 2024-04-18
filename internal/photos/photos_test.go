@@ -11,9 +11,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/twk/skeleton-go-cli/internal/photos"
-	mock_photos "github.com/twk/skeleton-go-cli/internal/photos/mocks"
 	"go.uber.org/zap"
+
+	"github.com/twk/skeleton-go-api/internal/photos"
+	mock_photos "github.com/twk/skeleton-go-api/internal/photos/mocks"
 )
 
 func TestGetPhotos(t *testing.T) {

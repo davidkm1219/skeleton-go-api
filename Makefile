@@ -1,4 +1,4 @@
-REPO_NAME := skeleton-go-cli
+REPO_NAME := skeleton-go-api
 BINARY_NAME := $(REPO_NAME)
 # Fetch the latest git tag.
 GIT_TAG := $(shell git describe --tags `git rev-list --tags --max-count=1`)

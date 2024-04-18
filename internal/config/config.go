@@ -5,13 +5,21 @@ import "time"
 
 // Config represents the configuration for the application.
 type Config struct {
-	ConfigPath string `mapstructure:"config_path"`
-	LogLevel   string `mapstructure:"log_level"`
-	Stacktrace bool   `mapstructure:"stacktrace"`
-	Get        Get    `mapstructure:"get"`
+	ConfigPath  string      `mapstructure:"config_path"`
+	LogLevel    string      `mapstructure:"log_level"`
+	Stacktrace  bool        `mapstructure:"stacktrace"`
+	Placeholder Placeholder `mapstructure:"placeholder"`
+	Server      Server      `mapstructure:"server"`
 }
 
-// Get represents the configuration for the get command.
-type Get struct {
+// Placeholder represents the configuration for the Placeholder command.
+type Placeholder struct {
+	ID int `mapstructure:"id"`
+}
+
+// Server holds the configuration for the server.
+type Server struct {
+	Host    string        `mapstructure:"host"`
+	Port    int           `mapstructure:"port"`
 	Timeout time.Duration `mapstructure:"timeout"`
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/twk/skeleton-go-cli/internal/config"
+	"github.com/twk/skeleton-go-api/internal/config"
 )
 
 func TestViper_SetFlags(t *testing.T) {

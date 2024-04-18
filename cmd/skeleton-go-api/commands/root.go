@@ -3,14 +3,20 @@ package commands
 
 import (
 	"fmt"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/twk/skeleton-go-cli/internal/config"
+	"github.com/twk/skeleton-go-api/internal/api"
+	"github.com/twk/skeleton-go-api/internal/client"
+	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/photos"
+	"github.com/twk/skeleton-go-api/internal/server"
 )
 
-const appName = "skeleton-go-cli"
+const appName = "skeleton-go-api"
 
 // NewRootCommand creates a new cobra command for the root command
 func NewRootCommand(logger *zap.Logger) (*cobra.Command, error) {
@@ -24,11 +30,11 @@ func NewRootCommand(logger *zap.Logger) (*cobra.Command, error) {
 
 	rootCmd := &cobra.Command{
 		Use:   appName,
-		Short: "CLI for the skeleton-go-cli application",
-		Long: `CLI for the skeleton-go-cli application.
-This CLI is used to interact with the skeleton-go-cli application.`,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			return cmd.Help()
+		Short: "CLI for the skeleton-go-api application",
+		Long: `CLI for the skeleton-go-api application.
+This CLI is used to interact with the skeleton-go-api application.`,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return startRoot(v, logger)
 		},
 		SilenceUsage: true,
 	}
@@ -37,7 +43,31 @@ This CLI is used to interact with the skeleton-go-cli application.`,
 		return nil, fmt.Errorf("error initializing flags: %w", err)
 	}
 
-	rootCmd.AddCommand(NewGetCmd(v, logger))
+	rootCmd.AddCommand(NewPlaceholderCmd(v, logger))
 
 	return rootCmd, nil
+}
+
+func startRoot(v *config.Viper, l *zap.Logger) error {
+	cfg, err := v.BuildConfig()
+	if err != nil {
+		return fmt.Errorf("error building config: %w", err)
+	}
+
+	l.Info("starting", zap.Any("config", cfg))
+
+	httpClient := &http.Client{}
+	hc := client.NewClient(httpClient)
+	ps := photos.NewService(hc, l)
+	pr := api.Photos(&cfg.Server, ps, l)
+	rp := []server.RouteParam{
+		{Method: http.MethodGet, Path: "/photos/:id", Handler: pr},
+	}
+	s := server.NewServer(&cfg.Server, gin.Default(), rp, l)
+
+	if err := s.Start(); err != nil {
+		return fmt.Errorf("error starting server: %w", err)
+	}
+
+	return nil
 }

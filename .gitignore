@@ -1,6 +1,6 @@
 # executables
 ./main
-./skeleton-go-cli
+./skeleton-go-api
 
 # Mac
 .DS_Store
@@ -39,3 +39,4 @@ logs*
 # data files
 *.json
 *.csv
+/skeleton-go-api
