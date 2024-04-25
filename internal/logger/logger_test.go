@@ -77,7 +77,7 @@ func TestLoggerOutput(t *testing.T) {
 	}
 	l := logger.NewLogger(lv)
 	observedZapCore, logs := observer.New(zap.DebugLevel)
-	l = l.WithOptions(zap.WrapCore(func(zapcore.Core) zapcore.Core { return observedZapCore }))
+	l.Logger = l.WithOptions(zap.WrapCore(func(zapcore.Core) zapcore.Core { return observedZapCore }))
 
 	l.Debug("test message")
 

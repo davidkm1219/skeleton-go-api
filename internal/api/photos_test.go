@@ -10,11 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
-
 	"github.com/twk/skeleton-go-api/internal/api"
 	mock "github.com/twk/skeleton-go-api/internal/api/mocks"
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/logger"
 	"github.com/twk/skeleton-go-api/internal/photos"
 )
 
@@ -97,7 +96,7 @@ func TestPhotosHandler(t *testing.T) {
 
 			router := gin.Default()
 
-			router.GET("/photos/:id", api.Photos(&config.Server{Timeout: 1 * time.Second}, mockService, zap.NewNop()))
+			router.GET("/photos/:id", api.Photos(&config.Server{Timeout: 1 * time.Second}, mockService, logger.NewNop()))
 
 			req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/photos/"+tt.args.id, http.NoBody)
 			assert.NoError(t, err)

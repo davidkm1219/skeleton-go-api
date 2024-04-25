@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/logger"
 	"github.com/twk/skeleton-go-api/internal/photos"
 )
 
@@ -18,7 +19,7 @@ type photoService interface {
 }
 
 // Photos returns a handler for getting photos
-func Photos(cfg *config.Server, ps photoService, l *zap.Logger) func(c *gin.Context) {
+func Photos(cfg *config.Server, ps photoService, l *logger.Logger) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), cfg.Timeout)
 		defer cancel()

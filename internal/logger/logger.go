@@ -15,8 +15,21 @@ type LogLevels struct {
 	AddStacktrace bool
 }
 
+// Logger is a custom-configured zap.Logger.
+type Logger struct {
+	*zap.Logger
+	logLevel zap.AtomicLevel
+}
+
+// NewNop creates and returns a no-op zap.Logger for test
+func NewNop() *Logger {
+	return &Logger{
+		Logger: zap.NewNop(),
+	}
+}
+
 // NewLogger creates and returns a custom-configured zap.Logger.
-func NewLogger(lv *LogLevels) *zap.Logger {
+func NewLogger(lv *LogLevels) *Logger {
 	encoderConfig := zapcore.EncoderConfig{
 		MessageKey:     "msg",
 		LevelKey:       "level",
@@ -40,15 +53,20 @@ func NewLogger(lv *LogLevels) *zap.Logger {
 		options = append(options, zap.AddStacktrace(logLevel))
 	}
 
+	atomicLevel := zap.NewAtomicLevelAt(logLevel)
+
 	core := zapcore.NewCore(
 		zapcore.NewConsoleEncoder(encoderConfig),
 		zapcore.Lock(os.Stdout),
-		zap.NewAtomicLevelAt(logLevel),
+		atomicLevel,
 	)
 
 	logger := zap.New(core, options...)
 
-	return logger
+	return &Logger{
+		Logger:   logger,
+		logLevel: atomicLevel,
+	}
 }
 
 func getLogLevelFromEnvOrDefault(lv *LogLevels) (zapcore.Level, bool) {
@@ -74,4 +92,16 @@ func getLogLevelFromEnvOrDefault(lv *LogLevels) (zapcore.Level, bool) {
 	}
 
 	return envLevel, envStacktrace
+}
+
+// SetLogLevel sets the log level of the logger.
+func (l *Logger) SetLogLevel(level string) {
+	l.Info("current log level", zap.String("level", l.logLevel.String()))
+
+	err := l.logLevel.UnmarshalText([]byte(level))
+	if err != nil {
+		l.Error("invalid log level provided and continue with existing log level", zap.Error(err))
+	}
+
+	l.Info("new log level", zap.String("level", l.logLevel.String()))
 }

@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/logger"
 )
 
 // RouteParam holds the each service that is required for the routes.
@@ -34,11 +35,11 @@ type httpRouter interface {
 type Server struct {
 	config *config.Server
 	router httpRouter
-	log    *zap.Logger
+	log    *logger.Logger
 }
 
 // NewServer creates a new server instance.
-func NewServer(cfg *config.Server, r httpRouter, rp []RouteParam, log *zap.Logger) *Server {
+func NewServer(cfg *config.Server, r httpRouter, rp []RouteParam, log *logger.Logger) *Server {
 	server := &Server{
 		config: cfg,
 		router: r,

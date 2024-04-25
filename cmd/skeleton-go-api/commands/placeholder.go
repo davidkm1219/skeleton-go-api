@@ -7,10 +7,11 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/logger"
 )
 
 // NewPlaceholderCmd creates a new cobra command for the get command
-func NewPlaceholderCmd(v *config.Viper, l *zap.Logger) *cobra.Command {
+func NewPlaceholderCmd(v *config.Viper, l *logger.Logger) *cobra.Command {
 	b := []config.BindDetail{
 		{Flag: config.FlagDetail{Name: "id", Shorthand: "i", Description: "placeholder flag option", DefaultValue: 1}, MapKey: "placeholder.id"},
 	}
@@ -31,7 +32,7 @@ func NewPlaceholderCmd(v *config.Viper, l *zap.Logger) *cobra.Command {
 	return cmd
 }
 
-func startPlaceholder(v *config.Viper, log *zap.Logger) error {
+func startPlaceholder(v *config.Viper, log *logger.Logger) error {
 	cfg, err := v.BuildConfig()
 	if err != nil {
 		return fmt.Errorf("error building config: %w", err)

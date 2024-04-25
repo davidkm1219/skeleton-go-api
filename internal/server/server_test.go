@@ -8,9 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
-
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/logger"
 	"github.com/twk/skeleton-go-api/internal/server"
 )
 
@@ -40,9 +39,9 @@ func TestServerServeHTTP(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			logger := zap.NewNop()
+			l := logger.NewNop()
 			router := gin.Default()
-			s := server.NewServer(&config.Server{Port: 8080}, router, []server.RouteParam{}, logger)
+			s := server.NewServer(&config.Server{Port: 8080}, router, []server.RouteParam{}, l)
 
 			req, err := http.NewRequestWithContext(context.Background(), tt.args.method, tt.args.path, http.NoBody)
 			assert.NoError(t, err)
@@ -57,9 +56,9 @@ func TestServerServeHTTP(t *testing.T) {
 }
 
 func TestLoggerMiddleware(t *testing.T) {
-	logger := zap.NewNop()
+	l := logger.NewNop()
 	router := gin.Default()
-	s := server.NewServer(&config.Server{Port: 8080}, router, []server.RouteParam{}, logger)
+	s := server.NewServer(&config.Server{Port: 8080}, router, []server.RouteParam{}, l)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
 	assert.NoError(t, err)
