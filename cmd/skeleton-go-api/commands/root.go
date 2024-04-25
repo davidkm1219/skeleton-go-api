@@ -12,6 +12,7 @@ import (
 	"github.com/twk/skeleton-go-api/internal/api"
 	"github.com/twk/skeleton-go-api/internal/client"
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/logger"
 	"github.com/twk/skeleton-go-api/internal/photos"
 	"github.com/twk/skeleton-go-api/internal/server"
 )
@@ -19,7 +20,7 @@ import (
 const appName = "skeleton-go-api"
 
 // NewRootCommand creates a new cobra command for the root command
-func NewRootCommand(logger *zap.Logger) (*cobra.Command, error) {
+func NewRootCommand(l *logger.Logger) (*cobra.Command, error) {
 	v := config.NewViper()
 
 	b := []config.BindDetail{
@@ -34,7 +35,7 @@ func NewRootCommand(logger *zap.Logger) (*cobra.Command, error) {
 		Long: `CLI for the skeleton-go-api application.
 This CLI is used to interact with the skeleton-go-api application.`,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			return startRoot(v, logger)
+			return startRoot(v, l)
 		},
 		SilenceUsage: true,
 	}
@@ -43,12 +44,12 @@ This CLI is used to interact with the skeleton-go-api application.`,
 		return nil, fmt.Errorf("error initializing flags: %w", err)
 	}
 
-	rootCmd.AddCommand(NewPlaceholderCmd(v, logger))
+	rootCmd.AddCommand(NewPlaceholderCmd(v, l))
 
 	return rootCmd, nil
 }
 
-func startRoot(v *config.Viper, l *zap.Logger) error {
+func startRoot(v *config.Viper, l *logger.Logger) error {
 	cfg, err := v.BuildConfig()
 	if err != nil {
 		return fmt.Errorf("error building config: %w", err)
