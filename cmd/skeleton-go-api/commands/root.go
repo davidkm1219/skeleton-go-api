@@ -62,7 +62,10 @@ func startRoot(v *config.Viper, l *logger.Logger) error {
 	if err != nil {
 		return fmt.Errorf("error creating http client: %w", err)
 	}
-	ps := photos.NewService(hc, l)
+
+	pc := photos.NewClient(photos.PhotoBaseURL, client.AuthTypeToken, hc, l)
+
+	ps := photos.NewService(pc, l)
 	pr := api.Photos(&cfg.Server, ps, l)
 	rp := []server.RouteParam{
 		{Method: http.MethodGet, Path: "/photos/:id", Handler: pr},
