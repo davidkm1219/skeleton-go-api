@@ -1,12 +1,8 @@
 package photos_test
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"fmt"
-	"io"
-	"net/http"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -33,9 +29,12 @@ func TestGetPhotos(t *testing.T) {
 		"success": {
 			fields: fields{
 				mockOperation: func(m *mock_photos.Mockclient) {
-					m.EXPECT().Get(context.Background(), "https://jsonplaceholder.typicode.com/photos/1").Return(&http.Response{
-						StatusCode: http.StatusOK,
-						Body:       io.NopCloser(bytes.NewReader([]byte(`{"albumId":1,"id":1,"title":"test","url":"test","thumbnailUrl":"test"}`))),
+					m.EXPECT().GetPhotos(context.Background(), 1).Return(&photos.Photo{
+						AlbumID:      1,
+						ID:           1,
+						Title:        "test",
+						URL:          "test",
+						ThumbnailURL: "test",
 					}, nil)
 				},
 			},
@@ -44,32 +43,10 @@ func TestGetPhotos(t *testing.T) {
 		"error": {
 			fields: fields{
 				mockOperation: func(m *mock_photos.Mockclient) {
-					m.EXPECT().Get(context.Background(), "https://jsonplaceholder.typicode.com/photos/1").Return(nil, errors.New("error"))
+					m.EXPECT().GetPhotos(context.Background(), 1).Return(nil, errors.New("error"))
 				},
 			},
 			want: want{err: errors.New("failed to get photos: error")},
-		},
-		"http not OK": {
-			fields: fields{
-				mockOperation: func(m *mock_photos.Mockclient) {
-					m.EXPECT().Get(context.Background(), "https://jsonplaceholder.typicode.com/photos/1").Return(&http.Response{
-						StatusCode: http.StatusNotFound,
-						Body:       io.NopCloser(bytes.NewReader([]byte(``))),
-					}, nil)
-				},
-			},
-			want: want{err: errors.New("received non-OK HTTP status: 404")},
-		},
-		"invalid body": {
-			fields: fields{
-				mockOperation: func(m *mock_photos.Mockclient) {
-					m.EXPECT().Get(context.Background(), "https://jsonplaceholder.typicode.com/photos/1").Return(&http.Response{
-						StatusCode: http.StatusOK,
-						Body:       io.NopCloser(bytes.NewReader([]byte(`{"albumId":1,"id":1,"title":"test","url":"test","thumbnailUrl":}`))),
-					}, nil)
-				},
-			},
-			want: want{err: errors.New("failed to decode response body: invalid character '}' looking for beginning of value")},
 		},
 	}
 
@@ -117,9 +94,12 @@ func TestGetPhotosConcurrently(t *testing.T) {
 			fields: fields{
 				mockOperation: func(m *mock_photos.Mockclient) {
 					for i := 1; i <= 5; i++ {
-						m.EXPECT().Get(context.Background(), fmt.Sprintf("https://jsonplaceholder.typicode.com/photos/%d", i)).Return(&http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"albumId":1,"id":%d,"title":"test","url":"test","thumbnailUrl":"test"}`, i)))),
+						m.EXPECT().GetPhotos(context.Background(), i).Return(&photos.Photo{
+							AlbumID:      1,
+							ID:           i,
+							Title:        "test",
+							URL:          "test",
+							ThumbnailURL: "test",
 						}, nil)
 					}
 				},
@@ -130,11 +110,14 @@ func TestGetPhotosConcurrently(t *testing.T) {
 			args: args{concurrency: 5},
 			fields: fields{
 				mockOperation: func(m *mock_photos.Mockclient) {
-					m.EXPECT().Get(context.Background(), "https://jsonplaceholder.typicode.com/photos/1").Return(nil, errors.New("error"))
+					m.EXPECT().GetPhotos(context.Background(), 1).Return(nil, errors.New("error"))
 					for i := 2; i <= 5; i++ {
-						m.EXPECT().Get(context.Background(), fmt.Sprintf("https://jsonplaceholder.typicode.com/photos/%d", i)).Return(&http.Response{
-							StatusCode: http.StatusOK,
-							Body:       io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"albumId":1,"id":%d,"title":"test","url":"test","thumbnailUrl":"test"}`, i)))),
+						m.EXPECT().GetPhotos(context.Background(), i).Return(&photos.Photo{
+							AlbumID:      1,
+							ID:           i,
+							Title:        "test",
+							URL:          "test",
+							ThumbnailURL: "test",
 						}, nil)
 					}
 				},

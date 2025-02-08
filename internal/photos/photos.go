@@ -1,19 +1,17 @@
 // Package photos provides the operations for handling photos operations. It contains the Service struct and the GetPhotosConcurrently function.
 package photos
 
+//go:generate mockgen -destination=mocks/photos.go -package=mock_photos -source=photos.go
+
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"sync"
 
 	"go.uber.org/zap"
 
 	"github.com/twk/skeleton-go-api/internal/logger"
 )
-
-const photosURL = "https://jsonplaceholder.typicode.com/photos"
 
 // Photo represents a photo object
 type Photo struct {
@@ -31,7 +29,7 @@ type Result struct {
 }
 
 type client interface {
-	Get(ctx context.Context, url string) (*http.Response, error)
+	GetPhotos(ctx context.Context, id int) (*Photo, error)
 }
 
 // Service provides the operations for handling photos operations
@@ -60,7 +58,7 @@ func (s *Service) GetPhotosConcurrently(ctx context.Context, concurrency int) []
 		go func(id int) {
 			defer wg.Done()
 
-			photo, err := s.GetPhotos(ctx, id)
+			photo, err := s.client.GetPhotos(ctx, id)
 			chanResult <- Result{Photo: photo, Err: err}
 		}(i)
 	}
@@ -89,26 +87,11 @@ func (s *Service) GetPhotosConcurrently(ctx context.Context, concurrency int) []
 
 // GetPhotos gets photos from the photos URL
 func (s *Service) GetPhotos(ctx context.Context, id int) (*Photo, error) {
-	resp, err := s.client.Get(ctx, fmt.Sprintf("%s/%d", photosURL, id))
+	resp, err := s.client.GetPhotos(ctx, id)
 	if err != nil {
 		s.log.Error("Failed to get photos", zap.Error(err))
 		return nil, fmt.Errorf("failed to get photos: %w", err)
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		s.log.Error("Non-OK HTTP status received", zap.Int("status", resp.StatusCode))
-		return nil, fmt.Errorf("received non-OK HTTP status: %d", resp.StatusCode)
-	}
-
-	var photo Photo
-
-	err = json.NewDecoder(resp.Body).Decode(&photo)
-	if err != nil {
-		s.log.Error("Failed to decode response body", zap.Error(err))
-		return nil, fmt.Errorf("failed to decode response body: %w", err)
-	}
-
-	return &photo, nil
+	return resp, nil
 }
