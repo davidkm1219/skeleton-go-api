@@ -16,6 +16,8 @@ import (
 )
 
 func TestGet(t *testing.T) {
+	t.Parallel()
+	
 	type args struct {
 		targetURL  string
 		path       string
@@ -150,6 +152,8 @@ func TestGet(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		targetURL  string
 		path       string

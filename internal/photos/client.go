@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// PhotoBaseURL is the base URL for the photo API.
 	PhotoBaseURL = "https://jsonplaceholder.typicode.com"
 	photoPath    = "/photos"
 )

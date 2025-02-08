@@ -58,6 +58,7 @@ func startRoot(v *config.Viper, l *logger.Logger) error {
 	l.Info("starting", zap.Any("config", cfg))
 
 	httpClient := &http.Client{}
+
 	hc, err := client.NewClient(httpClient)
 	if err != nil {
 		return fmt.Errorf("error creating http client: %w", err)

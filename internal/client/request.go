@@ -95,7 +95,6 @@ func Post[B any, T any](ctx context.Context, log *logger.Logger, c HTTPRequester
 	}
 
 	return &res, r.StatusCode, nil
-
 }
 
 func setAuth(authType AuthType, credential *string, header map[string]string, log *logger.Logger) error {

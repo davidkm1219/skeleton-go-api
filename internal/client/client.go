@@ -42,7 +42,7 @@ func NewClient(httpClient httpClient) (*Client, error) {
 }
 
 // Request performs an HTTP request with the specified method, URL, headers, query parameters, and body.
-func (c *Client) Request(ctx context.Context, logger *logger.Logger, method, targetURL, path string, headers, query map[string]string, body io.Reader) (*http.Response, error) {
+func (c *Client) Request(ctx context.Context, _ *logger.Logger, method, targetURL, path string, headers, query map[string]string, body io.Reader) (*http.Response, error) {
 	parsedURL, err := url.Parse(targetURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
