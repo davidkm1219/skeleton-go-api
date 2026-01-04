@@ -2,8 +2,13 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -12,6 +17,7 @@ import (
 	"github.com/twk/skeleton-go-api/internal/api"
 	"github.com/twk/skeleton-go-api/internal/client"
 	"github.com/twk/skeleton-go-api/internal/config"
+	"github.com/twk/skeleton-go-api/internal/db"
 	"github.com/twk/skeleton-go-api/internal/logger"
 	"github.com/twk/skeleton-go-api/internal/photos"
 	"github.com/twk/skeleton-go-api/internal/server"
@@ -57,6 +63,11 @@ func startRoot(v *config.Viper, l *logger.Logger) error {
 
 	l.Info("starting", zap.Any("config", cfg))
 
+	pool, err := db.NewDatabasePool(cfg)
+	if err != nil {
+		return fmt.Errorf("error opening db: %w", err)
+	}
+
 	httpClient := &http.Client{}
 	hc := client.NewClient(httpClient)
 	ps := photos.NewService(hc, l)
@@ -66,9 +77,47 @@ func startRoot(v *config.Viper, l *logger.Logger) error {
 	}
 	s := server.NewServer(&cfg.Server, gin.Default(), rp, l)
 
-	if err := s.Start(); err != nil {
-		return fmt.Errorf("error starting server: %w", err)
+	return runServer(cfg, s, pool, l)
+}
+
+func runServer(cfg *config.Config, s *server.Server, pool *db.DatabasePool, log *logger.Logger) error {
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	httpServer := &http.Server{
+		Addr:              addr,
+		Handler:           s,
+		ReadHeaderTimeout: cfg.Server.Timeout,
 	}
 
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- httpServer.ListenAndServe()
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case <-stop:
+		log.Info("shutdown signal received")
+	case err := <-errCh:
+		if err != nil && err != http.ErrServerClosed {
+			return fmt.Errorf("server error: %w", err)
+		}
+	}
+
+	shutdownTimeout := cfg.Server.Timeout
+	if shutdownTimeout <= 0 {
+		shutdownTimeout = 10 * time.Second
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	if err := httpServer.Shutdown(ctx); err != nil {
+		return fmt.Errorf("server shutdown failed: %w", err)
+	}
+	if err := pool.Close(); err != nil {
+		return fmt.Errorf("db shutdown failed: %w", err)
+	}
+	log.Info("shutdown complete")
 	return nil
 }

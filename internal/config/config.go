@@ -10,6 +10,7 @@ type Config struct {
 	Stacktrace  bool        `mapstructure:"stacktrace"`
 	Placeholder Placeholder `mapstructure:"placeholder"`
 	Server      Server      `mapstructure:"server"`
+	Database    Database    `mapstructure:"database"`
 }
 
 // Placeholder represents the configuration for the Placeholder command.
@@ -22,4 +23,14 @@ type Server struct {
 	Host    string        `mapstructure:"host"`
 	Port    int           `mapstructure:"port"`
 	Timeout time.Duration `mapstructure:"timeout"`
+}
+
+// Database holds database configuration.
+type Database struct {
+	Driver            string        `mapstructure:"driver"`
+	DatabaseURL       string        `mapstructure:"database_url"`
+	MaxConnection     int           `mapstructure:"max_connection"`
+	MaxIdleConnection int           `mapstructure:"max_idle_connection"`
+	ConnMaxLifetime   time.Duration `mapstructure:"conn_max_lifetime"`
+	PingTimeout       time.Duration `mapstructure:"ping_timeout"`
 }
