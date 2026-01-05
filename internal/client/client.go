@@ -308,3 +308,28 @@ func paginateGeneric[T any, R any](
 // 		func(r *paginatedResponse[User]) string { return r.NextPage },
 // 	)
 // }
+/*
+type FooPage struct {
+	Data []Foo `json:"data"`
+	Next string `json:"next"`
+}
+
+page, _ := PagedGetGeneric[FooPage](ctx, client, "/foo", params)
+
+items, _ := PaginateGeneric[Foo, FooPage](
+	ctx,
+	client,
+	"/foo",
+	params,
+	PagedGetGeneric[FooPage],
+	func(p *FooPage) []Foo { return p.Data },
+	func(p *FooPage) string { return p.Next },
+)
+
+Those two functions are only needed for the generic paginator, because every external API returns pagination differently.
+
+getItems tells the paginator how to extract the list of items from your custom response type.
+getNextPage tells it how to get the “next page” token (or empty string to stop).
+
+For the old PagedGet/Paginate, these are not needed because the response shape is fixed (items, next_page, total_count).
+*/
