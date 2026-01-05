@@ -148,8 +148,15 @@ func get[T any](ctx context.Context, client *Client, path string, queryParams ma
 	return &result, nil
 }
 
-func post[T any](ctx context.Context, client *Client, path string, body io.Reader, headers map[string]string) (*T, error) {
-	resp, err := client.Post(ctx, path, body, headers)
+func Post[T any, B any](ctx context.Context, client *Client, path string, body *B, headers map[string]string) (*T, error) {
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
+	}
+	
+	bodyReader := bytes.NewReader(bodyBytes)
+
+	resp, err := client.Post(ctx, path, bodyReader, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -225,3 +232,79 @@ func paginate[T any](ctx context.Context, client *Client, path string, query map
 
 	return results, nil
 }
+
+// Example of how to use paginate
+// func ExamplePaginateUsers(ctx context.Context, client *Client) ([]User, error) {
+// 	return paginate[User](ctx, client, "/users", map[string]string{}, pagedGet[User])
+// }
+
+func pagedGetGeneric[R any](ctx context.Context, client *Client, path string, queryParams map[string]string) (*R, error) {
+	resp, err := client.Get(ctx, path, queryParams)
+	if err != nil {
+		return nil, fmt.Errorf("failed to make paged GET request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(respBody))
+	}
+
+	var pagedResp R
+	if err := json.Unmarshal(respBody, &pagedResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal paged response body: %w", err)
+	}
+
+	return &pagedResp, nil
+}
+
+func paginateGeneric[T any, R any](
+	ctx context.Context,
+	client *Client,
+	path string,
+	query map[string]string,
+	getPageFunc func(context.Context, *Client, string, map[string]string) (*R, error),
+	getItems func(*R) []T,
+	getNextPage func(*R) string,
+) ([]T, error) {
+	results := make([]T, 0)
+	nextPage := ""
+
+	for {
+		if nextPage != "" {
+			query["page"] = nextPage
+		}
+
+		pageResp, err := getPageFunc(ctx, client, path, query)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get page: %w", err)
+		}
+
+		results = append(results, getItems(pageResp)...)
+
+		nextPage = getNextPage(pageResp)
+		if nextPage == "" {
+			break
+		}
+	}
+
+	return results, nil
+}
+
+// Example of how to use paginateGeneric
+
+// func ExamplePaginateUsersGeneric(ctx context.Context, client *Client) ([]User, error) {
+// 	return paginateGeneric[User, paginatedResponse[User]](
+// 		ctx,
+// 		client,
+// 		"/users",
+// 		map[string]string{},
+// 		pagedGetGeneric[paginatedResponse[User]],
+// 		func(r *paginatedResponse[User]) []User { return r.Items },
+// 		func(r *paginatedResponse[User]) string { return r.NextPage },
+// 	)
+// }
